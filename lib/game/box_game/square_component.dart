@@ -1,6 +1,13 @@
+import 'dart:async';
+
+import 'package:bilsemup_minigame/states/box_game_provider.dart';
 import 'package:flame/components.dart';
+import 'package:flame/effects.dart';
 import 'package:flame/events.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:provider/provider.dart';
+import 'package:flame_audio/flame_audio.dart';
 
 class SquareComponent extends PositionComponent with TapCallbacks {
   final Color initialColor;
@@ -8,9 +15,12 @@ class SquareComponent extends PositionComponent with TapCallbacks {
   final bool isCorrect;
   final int index;
   late Color currentColor;
-  final VoidCallback? onIncorrectTap; // Hata callback'i
+  late List<Color> correctColors;
+  late List<int> correctSquaresIndex;
+  final VoidCallback? onIncorrectTap;
   final VoidCallback? onCorrectTap;
-
+  var boxprovider =
+      Provider.of<MemoryGameProvider>(Get.context!, listen: false);
   SquareComponent(
     this.initialColor,
     Vector2 position,
@@ -19,6 +29,8 @@ class SquareComponent extends PositionComponent with TapCallbacks {
     this.index, {
     this.onIncorrectTap,
     this.onCorrectTap,
+    required this.correctColors,
+    required this.correctSquaresIndex,
   }) : super(
           position: position,
           size: Vector2(squareSize, squareSize),
@@ -30,18 +42,14 @@ class SquareComponent extends PositionComponent with TapCallbacks {
   void render(Canvas canvas) {
     super.render(canvas);
 
-    // Yuvarlatılmış köşe yarıçapı
-    const double cornerRadius = 8.0;
+    const double cornerRadius = 20.0;
 
-    // RRect tanımlama
     final rect = size.toRect();
     final rrect = RRect.fromRectAndRadius(rect, Radius.circular(cornerRadius));
 
-    // Kare boyama
     final paint = Paint()..color = currentColor;
     canvas.drawRRect(rrect, paint);
 
-    // Kenar boyama
     final borderPaint = Paint()
       ..color = Colors.black
       ..strokeWidth = 1.0
@@ -51,17 +59,49 @@ class SquareComponent extends PositionComponent with TapCallbacks {
   }
 
   @override
+  FutureOr<void> onLoad() {
+    return super.onLoad();
+  }
+
+  @override
   void onTapDown(TapDownEvent event) {
     super.onTapDown(event);
-    if (!isCorrect) {
-      onIncorrectTap?.call();
-    } else {
-      onCorrectTap?.call();
+    if (boxprovider.hasStartGame! &&
+        boxprovider.endOption.value == 0 &&
+        currentColor == Colors.grey[800]!) {
+      FlameAudio.play('sound/click_sound.wav', volume: 0.5);
+      if (!isCorrect) {
+        onIncorrectTap?.call();
+        changeColor(Colors.blueGrey);
+      } else {
+        onCorrectTap?.call();
+        changeColor(correctColors[
+            correctSquaresIndex.indexOf(index) % correctColors.length]);
+      }
+
+      animateSizeChange();
     }
-    changeColor(isCorrect ? Colors.green : Colors.blueGrey[800]!);
   }
 
   void changeColor(Color newColor) {
     currentColor = newColor;
+  }
+
+  Future<void> animateSizeChange() async {
+    final targetSize = size.clone()..multiply(Vector2(1.1, 1.1));
+
+    final originalSize = size.clone();
+
+    const duration = 0.1;
+
+    add(
+      SizeEffect.to(
+        targetSize,
+        EffectController(duration: duration, reverseDuration: duration),
+        onComplete: () {
+          size = originalSize;
+        },
+      ),
+    );
   }
 }
