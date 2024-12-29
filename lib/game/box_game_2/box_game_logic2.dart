@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:bilsemup_minigame/game/box_game/grid_component.dart';
+import 'package:bilsemup_minigame/game/box_game_2/grid_component2.dart';
 import 'package:bilsemup_minigame/states/box_game_provider.dart';
 import 'package:flame/game.dart';
 import 'package:flame_audio/flame_audio.dart';
@@ -8,10 +8,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 
-class MemoryGame extends FlameGame {
-  late List<Color> colors;
+class MemoryGame2 extends FlameGame {
   late List<int> correctSquares;
-  late GridComponent grid;
+  late GridComponent2 grid;
   int incorrectTaps = 0;
   int score = 0;
   final VoidCallback onFinishGame;
@@ -20,9 +19,8 @@ class MemoryGame extends FlameGame {
   var boxprovider =
       Provider.of<MemoryGameProvider>(Get.context!, listen: false);
 
-  MemoryGame(
+  MemoryGame2(
       {required this.onFinishGame,
-      required this.colors,
       required this.maxCorrectSquares,
       required this.seconds});
 
@@ -37,24 +35,21 @@ class MemoryGame extends FlameGame {
     boxprovider.setStartGame(false);
     correctSquares = _generateRandomSquares(maxCorrectSquares);
 
-    grid = GridComponent(correctSquares, colors,
-        onIncorrectTap: _handleIncorrectTap, onCorrectTap: _handleCorrectTap);
+    grid = GridComponent2(correctSquares,
+        colors: [Colors.blue],
+        onIncorrectTap: _handleIncorrectTap,
+        onCorrectTap: _handleCorrectTap);
+
     add(grid);
 
-    Timer.periodic(Duration(milliseconds: seconds), (timer) {
-      if (timer.tick >= 10) {
-        grid.hideColors();
-        timer.cancel();
-        boxprovider.setStartGame(true);
-      }
-    });
+    grid.showBlues(); // Tüm mavi renkleri göster
+    boxprovider.setStartGame(true);
   }
 
   void _handleIncorrectTap() async {
     incorrectTaps++;
 
     if (incorrectTaps == 1) {
-      grid.showColors();
       boxprovider.setOption(2);
       FlameAudio.play('sound/fail_game.mp3', volume: 0.8);
       await Future.delayed(Duration(milliseconds: 900));

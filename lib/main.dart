@@ -1,13 +1,20 @@
-import 'package:bilsemup_minigame/pages/simple_box_game.dart';
+import 'package:bilsemup_minigame/pages/game_list.dart';
 import 'package:bilsemup_minigame/states/box_game_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 
 void main() {
-  runApp(MultiProvider(providers: [
-    ChangeNotifierProvider(create: (_) => MemoryGameProvider()),
-  ], child: const MyApp()));
+  WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp, // Sadece dikey (yukarı)
+    DeviceOrientation.portraitDown, // Dikey (ters)
+  ]).then((_) {
+    runApp(MultiProvider(providers: [
+      ChangeNotifierProvider(create: (_) => MemoryGameProvider()),
+    ], child: const MyApp()));
+  });
 }
 
 class MyApp extends StatelessWidget {
@@ -20,7 +27,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: SimpleBoxGame(),
+      home: GameList(),
     );
   }
 }

@@ -1,26 +1,27 @@
 import 'dart:async';
-import 'package:bilsemup_minigame/states/box_game_provider.dart';
+
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
 import 'package:flame/events.dart';
+import 'package:flame_audio/flame_audio.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
-import 'package:flame_audio/flame_audio.dart';
+import 'package:bilsemup_minigame/states/box_game_provider.dart';
 
-class SquareComponent extends PositionComponent with TapCallbacks {
+class SquareComponent2 extends PositionComponent with TapCallbacks {
   final Color initialColor;
   final double squareSize;
   final bool isCorrect;
   final int index;
   late Color currentColor;
-  late List<Color> correctColors;
   late List<int> correctSquaresIndex;
   final VoidCallback? onIncorrectTap;
   final VoidCallback? onCorrectTap;
   var boxprovider =
       Provider.of<MemoryGameProvider>(Get.context!, listen: false);
-  SquareComponent(
+
+  SquareComponent2(
     this.initialColor,
     Vector2 position,
     this.squareSize,
@@ -28,7 +29,6 @@ class SquareComponent extends PositionComponent with TapCallbacks {
     this.index, {
     this.onIncorrectTap,
     this.onCorrectTap,
-    required this.correctColors,
     required this.correctSquaresIndex,
   }) : super(
           position: position,
@@ -58,24 +58,18 @@ class SquareComponent extends PositionComponent with TapCallbacks {
   }
 
   @override
-  FutureOr<void> onLoad() {
-    return super.onLoad();
-  }
-
-  @override
   void onTapDown(TapDownEvent event) {
     super.onTapDown(event);
-    if (boxprovider.hasStartGame! &&
-        boxprovider.endOption == 0 &&
-        currentColor == Colors.grey[800]!) {
+    if (boxprovider.hasStartGame! && boxprovider.endOption == 0) {
       FlameAudio.play('sound/click_sound.wav', volume: 0.5);
       if (!isCorrect) {
         onIncorrectTap?.call();
-        changeColor(Colors.blueGrey);
+        changeColor(Colors.red);
       } else {
         onCorrectTap?.call();
-        changeColor(correctColors[
-            correctSquaresIndex.indexOf(index) % correctColors.length]);
+        changeColor(Colors.green);
+
+        checkCorrectOrder();
       }
 
       animateSizeChange();
@@ -102,5 +96,21 @@ class SquareComponent extends PositionComponent with TapCallbacks {
         },
       ),
     );
+  }
+
+  void checkCorrectOrder() {
+    if (correctSquaresIndex.contains(index)) {
+      correctSquaresIndex.remove(index);
+
+      if (correctSquaresIndex.isEmpty) {
+        FlameAudio.play('sound/success_game.mp3', volume: 0.8);
+        Future.delayed(Duration(milliseconds: 900), () {
+          onCorrectTap?.call(); // Oyunu tamamla
+        });
+      }
+    } else {
+      // Yanlış sıra
+      onIncorrectTap?.call(); // Tekrar yanlış yapıldıysa ilgili işlemleri yap
+    }
   }
 }

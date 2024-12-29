@@ -1,29 +1,26 @@
 import 'dart:async';
-import 'package:bilsemup_minigame/game/box_game/box_game_logic.dart';
+import 'package:bilsemup_minigame/game/box_game_2/box_game_logic2.dart';
 import 'package:bilsemup_minigame/states/box_game_provider.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class SimpleBoxGame extends StatefulWidget {
+class SimpleBoxGame2 extends StatefulWidget {
   @override
-  State<SimpleBoxGame> createState() => _SimpleBoxGameState();
+  State<SimpleBoxGame2> createState() => _SimpleBoxGame2State();
 }
 
-class _SimpleBoxGameState extends State<SimpleBoxGame> {
+class _SimpleBoxGame2State extends State<SimpleBoxGame2> {
   bool _dialogVisible = true;
   int _countdownTime = 3;
   late Timer _countdownTimer;
   List<GameOptions> options = [];
   List<int> correctAnswers = [];
   int gameIndex = 0;
-
   late Timer _scoreTimer;
-
   @override
   void initState() {
     super.initState();
-
     _init();
   }
 
@@ -59,6 +56,7 @@ class _SimpleBoxGameState extends State<SimpleBoxGame> {
   void dispose() {
     if (_countdownTimer.isActive) _countdownTimer.cancel();
     if (_scoreTimer.isActive) _scoreTimer.cancel();
+
     super.dispose();
   }
 
@@ -68,7 +66,8 @@ class _SimpleBoxGameState extends State<SimpleBoxGame> {
       child: Scaffold(
         appBar: AppBar(
           iconTheme: IconThemeData(color: Colors.white),
-          title: Text('Simple Box Game', style: TextStyle(color: Colors.white)),
+          title:
+              Text('Simple Box Game 2', style: TextStyle(color: Colors.white)),
           backgroundColor: Colors.blue,
         ),
         backgroundColor: Colors.white,
@@ -141,104 +140,11 @@ class _SimpleBoxGameState extends State<SimpleBoxGame> {
                                   color: Colors.white,
                                 );
                               },
-                              game: MemoryGame(
-                                colors: options[gameIndex].colors!,
+                              game: MemoryGame2(
                                 maxCorrectSquares:
                                     options[gameIndex].correctSquares!,
                                 seconds: options[gameIndex].milliseconds!,
-                                onFinishGame: () async {
-                                  await context
-                                      .read<MemoryGameProvider>()
-                                      .stopLevelTimer();
-                                  if (context
-                                          .read<MemoryGameProvider>()
-                                          .endOption !=
-                                      2) {
-                                    int score = context
-                                        .read<MemoryGameProvider>()
-                                        .calculateScore(context
-                                            .read<MemoryGameProvider>()
-                                            .elapsedSeconds
-                                            .value);
-                                    context
-                                        .read<MemoryGameProvider>()
-                                        .totalScore += score;
-                                    await context
-                                        .read<MemoryGameProvider>()
-                                        .startLevelTimer();
-                                  }
-
-                                  gameIndex++;
-
-                                  await Future.delayed(
-                                      Duration(milliseconds: 50));
-                                  setState(() {
-                                    final bool result = context
-                                                .read<MemoryGameProvider>()
-                                                .endOption ==
-                                            1
-                                        ? true
-                                        : false;
-
-                                    if (result) {
-                                      correctAnswers.add(1);
-                                    } else {
-                                      correctAnswers.add(0);
-                                    }
-
-                                    final int correctCount = correctAnswers
-                                        .where((answer) => answer == 1)
-                                        .length;
-
-                                    if (correctCount >= 20) {
-                                      options.add(GameOptions(colors: [
-                                        Colors.blue,
-                                        Colors.red,
-                                        Colors.green,
-                                        Colors.yellow,
-                                        Colors.purple
-                                      ], correctSquares: 5, milliseconds: 10));
-                                    } else if (correctCount >= 12) {
-                                      options.add(GameOptions(colors: [
-                                        Colors.blue,
-                                        Colors.red,
-                                        Colors.green,
-                                        Colors.yellow,
-                                        Colors.purple
-                                      ], correctSquares: 5, milliseconds: 25));
-                                    } else if (correctCount >= 9) {
-                                      options.add(GameOptions(colors: [
-                                        Colors.blue,
-                                        Colors.red,
-                                        Colors.green,
-                                        Colors.yellow,
-                                        Colors.purple
-                                      ], correctSquares: 5, milliseconds: 35));
-                                    } else if (correctCount >= 4) {
-                                      options.add(GameOptions(colors: [
-                                        Colors.blue,
-                                        Colors.red,
-                                        Colors.green,
-                                        Colors.yellow
-                                      ], correctSquares: 4, milliseconds: 50));
-                                    } else {
-                                      options.add(GameOptions(colors: [
-                                        Colors.blue,
-                                        Colors.red,
-                                        Colors.green
-                                      ], correctSquares: 3, milliseconds: 100));
-                                    }
-                                  });
-
-                                  if (context
-                                          .read<MemoryGameProvider>()
-                                          .endOption ==
-                                      2) {
-                                    print(context
-                                        .read<MemoryGameProvider>()
-                                        .totalScore);
-                                  }
-                                },
+                                onFinishGame: () async {},
                               ),
                             ),
                           ),
@@ -344,8 +250,7 @@ class _SimpleBoxGameState extends State<SimpleBoxGame> {
                                       color: Colors.grey.withOpacity(0.5),
                                       spreadRadius: 3,
                                       blurRadius: 5,
-                                      offset: Offset(
-                                          0, 3), // changes position of shadow
+                                      offset: Offset(0, 3),
                                     ),
                                   ],
                                 ),
