@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
 import 'package:flame/events.dart';
@@ -18,6 +17,7 @@ class SquareComponent2 extends PositionComponent with TapCallbacks {
   late List<int> correctSquaresIndex;
   final VoidCallback? onIncorrectTap;
   final VoidCallback? onCorrectTap;
+
   var boxprovider =
       Provider.of<MemoryGameProvider>(Get.context!, listen: false);
 
@@ -41,7 +41,7 @@ class SquareComponent2 extends PositionComponent with TapCallbacks {
   void render(Canvas canvas) {
     super.render(canvas);
 
-    const double cornerRadius = 20.0;
+    double cornerRadius = MediaQuery.of(Get.context!).size.width * 0.025;
 
     final rect = size.toRect();
     final rrect = RRect.fromRectAndRadius(rect, Radius.circular(cornerRadius));
@@ -60,20 +60,31 @@ class SquareComponent2 extends PositionComponent with TapCallbacks {
   @override
   void onTapDown(TapDownEvent event) {
     super.onTapDown(event);
-    if (boxprovider.hasStartGame! && boxprovider.endOption == 0) {
+    if (boxprovider.hasStartGame! &&
+        boxprovider.endOption == 0 &&
+        currentColor == Colors.grey[800]!) {
       FlameAudio.play('sound/click_sound.wav', volume: 0.5);
-      if (!isCorrect) {
+
+      final isCorrect = controlColor();
+
+      if (isCorrect) {
+        onCorrectTap?.call();
+        changeColor(Colors.blue);
+      } else {
         onIncorrectTap?.call();
         changeColor(Colors.red);
-      } else {
-        onCorrectTap?.call();
-        changeColor(Colors.green);
-
-        checkCorrectOrder();
       }
 
       animateSizeChange();
     }
+  }
+
+  bool controlColor() {
+    if (correctSquaresIndex.isNotEmpty &&
+        index == correctSquaresIndex[boxprovider.setScore]) {
+      return true;
+    }
+    return false;
   }
 
   void changeColor(Color newColor) {
@@ -81,9 +92,10 @@ class SquareComponent2 extends PositionComponent with TapCallbacks {
   }
 
   Future<void> animateSizeChange() async {
-    final targetSize = size.clone()..multiply(Vector2(1.1, 1.1));
-
+    final targetSize = size.clone()..multiply(Vector2(1.0, 1.0));
     final originalSize = size.clone();
+    final originalPosition = position.clone();
+    final targetPosition = position.clone()..add(Vector2(0, -10));
 
     final duration = 0.2;
 
@@ -96,21 +108,15 @@ class SquareComponent2 extends PositionComponent with TapCallbacks {
         },
       ),
     );
-  }
 
-  void checkCorrectOrder() {
-    if (correctSquaresIndex.contains(index)) {
-      correctSquaresIndex.remove(index);
-
-      if (correctSquaresIndex.isEmpty) {
-        FlameAudio.play('sound/success_game.mp3', volume: 0.8);
-        Future.delayed(Duration(milliseconds: 900), () {
-          onCorrectTap?.call(); // Oyunu tamamla
-        });
-      }
-    } else {
-      // Yanlış sıra
-      onIncorrectTap?.call(); // Tekrar yanlış yapıldıysa ilgili işlemleri yap
-    }
+    add(
+      MoveEffect.to(
+        targetPosition,
+        EffectController(duration: duration, reverseDuration: duration),
+        onComplete: () {
+          position = originalPosition;
+        },
+      ),
+    );
   }
 }

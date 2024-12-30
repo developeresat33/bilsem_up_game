@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:bilsemup_minigame/common/common_ui_widgets.dart';
 import 'package:bilsemup_minigame/game/box_game_2/box_game_logic2.dart';
 import 'package:bilsemup_minigame/states/box_game_provider.dart';
 import 'package:flame/game.dart';
@@ -18,6 +19,7 @@ class _SimpleBoxGame2State extends State<SimpleBoxGame2> {
   List<int> correctAnswers = [];
   int gameIndex = 0;
   late Timer _scoreTimer;
+
   @override
   void initState() {
     super.initState();
@@ -30,12 +32,7 @@ class _SimpleBoxGame2State extends State<SimpleBoxGame2> {
     correctAnswers = [];
     gameIndex = 0;
     context.read<MemoryGameProvider>().totalScore = 0;
-    options = [
-      GameOptions(
-          colors: [Colors.blue, Colors.red, Colors.green],
-          correctSquares: 3,
-          milliseconds: 100)
-    ];
+    options = [GameOptions(correctSquares: 3, milliseconds: 400)];
     context.read<MemoryGameProvider>().endOption = 0;
 
     _countdownTimer = Timer.periodic(Duration(seconds: 1), (timer) {
@@ -56,7 +53,6 @@ class _SimpleBoxGame2State extends State<SimpleBoxGame2> {
   void dispose() {
     if (_countdownTimer.isActive) _countdownTimer.cancel();
     if (_scoreTimer.isActive) _scoreTimer.cancel();
-
     super.dispose();
   }
 
@@ -67,7 +63,7 @@ class _SimpleBoxGame2State extends State<SimpleBoxGame2> {
         appBar: AppBar(
           iconTheme: IconThemeData(color: Colors.white),
           title:
-              Text('Simple Box Game 2', style: TextStyle(color: Colors.white)),
+              Text('Kutu Oyunu Sıralı', style: TextStyle(color: Colors.white)),
           backgroundColor: Colors.blue,
         ),
         backgroundColor: Colors.white,
@@ -130,8 +126,8 @@ class _SimpleBoxGame2State extends State<SimpleBoxGame2> {
                           ),
                           Container(
                             alignment: Alignment.center,
-                            height: 380,
-                            width: 350,
+                            height: MediaQuery.of(context).size.height * 0.25,
+                            width: MediaQuery.of(context).size.height * 0.25,
                             child: GameWidget(
                               backgroundBuilder: (context) {
                                 return Container(
@@ -144,7 +140,81 @@ class _SimpleBoxGame2State extends State<SimpleBoxGame2> {
                                 maxCorrectSquares:
                                     options[gameIndex].correctSquares!,
                                 seconds: options[gameIndex].milliseconds!,
-                                onFinishGame: () async {},
+                                onFinishGame: () async {
+                                  await context
+                                      .read<MemoryGameProvider>()
+                                      .stopLevelTimer();
+                                  if (context
+                                          .read<MemoryGameProvider>()
+                                          .endOption !=
+                                      2) {
+                                    int score = context
+                                        .read<MemoryGameProvider>()
+                                        .calculateScore(context
+                                            .read<MemoryGameProvider>()
+                                            .elapsedSeconds
+                                            .value);
+                                    context
+                                        .read<MemoryGameProvider>()
+                                        .totalScore += score;
+                                    await context
+                                        .read<MemoryGameProvider>()
+                                        .startLevelTimer();
+                                  }
+
+                                  gameIndex++;
+                                  await Future.delayed(
+                                      Duration(milliseconds: 50));
+                                  setState(() {
+                                    final bool result = context
+                                                .read<MemoryGameProvider>()
+                                                .endOption ==
+                                            1
+                                        ? true
+                                        : false;
+
+                                    if (result) {
+                                      correctAnswers.add(1);
+                                    } else {
+                                      correctAnswers.add(0);
+                                    }
+
+                                    final int correctCount = correctAnswers
+                                        .where((answer) => answer == 1)
+                                        .length;
+
+                                    if (correctCount >= 20) {
+                                      options.add(GameOptions(
+                                          correctSquares: 5,
+                                          milliseconds: 300));
+                                    } else if (correctCount >= 12) {
+                                      options.add(GameOptions(
+                                          correctSquares: 5,
+                                          milliseconds: 325));
+                                    } else if (correctCount >= 9) {
+                                      options.add(GameOptions(
+                                          correctSquares: 4,
+                                          milliseconds: 350));
+                                    } else if (correctCount >= 4) {
+                                      options.add(GameOptions(
+                                          correctSquares: 4,
+                                          milliseconds: 375));
+                                    } else {
+                                      options.add(GameOptions(
+                                          correctSquares: 3,
+                                          milliseconds: 400));
+                                    }
+                                  });
+
+                                  if (context
+                                          .read<MemoryGameProvider>()
+                                          .endOption ==
+                                      2) {
+                                    print(context
+                                        .read<MemoryGameProvider>()
+                                        .totalScore);
+                                  }
+                                },
                               ),
                             ),
                           ),
@@ -240,8 +310,10 @@ class _SimpleBoxGame2State extends State<SimpleBoxGame2> {
                             padding: const EdgeInsets.only(top: 20.0),
                             child: Container(
                                 alignment: Alignment.center,
-                                height: 200,
-                                width: 200,
+                                height:
+                                    MediaQuery.of(context).size.height * 0.09,
+                                width:
+                                    MediaQuery.of(context).size.height * 0.09,
                                 decoration: BoxDecoration(
                                   color: Colors.white,
                                   borderRadius: BorderRadius.circular(10.0),
@@ -250,18 +322,22 @@ class _SimpleBoxGame2State extends State<SimpleBoxGame2> {
                                       color: Colors.grey.withOpacity(0.5),
                                       spreadRadius: 3,
                                       blurRadius: 5,
-                                      offset: Offset(0, 3),
+                                      offset: Offset(
+                                          0, 3), // changes position of shadow
                                     ),
                                   ],
                                 ),
-                                child: Icon(
-                                  _value.endOption == 1
-                                      ? Icons.check_circle
-                                      : Icons.cancel_outlined,
-                                  color: _value.endOption == 1
-                                      ? Colors.green
-                                      : Colors.red,
-                                  size: 80.0,
+                                child: FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Icon(
+                                    _value.endOption == 1
+                                        ? Icons.check_circle
+                                        : Icons.cancel_outlined,
+                                    color: _value.endOption == 1
+                                        ? Colors.green
+                                        : Colors.red,
+                                    size: 40.0,
+                                  ),
                                 )),
                           );
                         else
@@ -272,89 +348,13 @@ class _SimpleBoxGame2State extends State<SimpleBoxGame2> {
                 ),
               ),
             if (context.read<MemoryGameProvider>().endOption == 2)
-              Expanded(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Row(
-                      children: [
-                        SizedBox(
-                          width: 10,
-                        ),
-                        Expanded(
-                          child: Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(5),
-                              border:
-                                  Border.all(color: Colors.black87, width: 2),
-                            ),
-                            height: 80,
-                            child: Center(
-                              child: Text(
-                                "Oyun Bitti",
-                                style: TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black87),
-                              ),
-                            ),
-                          ),
-                        ),
-                        SizedBox(
-                          width: 10,
-                        ),
-                      ],
-                    ),
-                    SizedBox(
-                      height: 15,
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          "Mevcut Seviye ${correctAnswers.length}",
-                          style: TextStyle(fontSize: 17),
-                        )
-                      ],
-                    ),
-                    SizedBox(
-                      height: 15,
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          "Skor: ${context.read<MemoryGameProvider>().totalScore} ",
-                          style: TextStyle(fontSize: 17),
-                        )
-                      ],
-                    ),
-                    SizedBox(
-                      height: 5,
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        TextButton.icon(
-                            onPressed: () {
-                              setState(() {
-                                _init();
-                              });
-                            },
-                            icon: Icon(
-                              Icons.refresh,
-                              size: 30,
-                            ),
-                            label: Text(
-                              "Tekrar Oyna",
-                              style: TextStyle(fontSize: 17),
-                            )),
-                      ],
-                    )
-                  ],
-                ),
-              ),
+              CommonUiWidgets.gameOverWidget(context, () {
+                if (_countdownTimer.isActive) _countdownTimer.cancel();
+                if (_scoreTimer.isActive) _scoreTimer.cancel();
+                setState(() {
+                  _init();
+                });
+              }, correctAnswers)
           ],
         ),
       ),
@@ -364,8 +364,8 @@ class _SimpleBoxGame2State extends State<SimpleBoxGame2> {
   Widget _showCountdownDialog() {
     return Center(
       child: Container(
-        width: 100,
-        height: 100,
+        width: MediaQuery.of(context).size.height * 0.09,
+        height: MediaQuery.of(context).size.height * 0.09,
         alignment: Alignment.center,
         decoration: BoxDecoration(
           color: Colors.white,
@@ -381,12 +381,15 @@ class _SimpleBoxGame2State extends State<SimpleBoxGame2> {
         ),
         child: Padding(
           padding: const EdgeInsets.all(4.0),
-          child: Text(
-            '$_countdownTime',
-            style: TextStyle(
-                fontSize: 50,
-                fontWeight: FontWeight.bold,
-                color: Colors.lightBlue[800]),
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              '$_countdownTime',
+              style: TextStyle(
+                  fontSize: 50,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.lightBlue[800]),
+            ),
           ),
         ),
       ),
@@ -400,7 +403,5 @@ class GameOptions {
   int? milliseconds;
 
   GameOptions(
-      {required this.colors,
-      required this.correctSquares,
-      required this.milliseconds});
+      {this.colors, required this.correctSquares, required this.milliseconds});
 }

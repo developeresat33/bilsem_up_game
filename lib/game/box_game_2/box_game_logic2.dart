@@ -12,7 +12,6 @@ class MemoryGame2 extends FlameGame {
   late List<int> correctSquares;
   late GridComponent2 grid;
   int incorrectTaps = 0;
-  int score = 0;
   final VoidCallback onFinishGame;
   final int maxCorrectSquares;
   final int seconds;
@@ -31,19 +30,17 @@ class MemoryGame2 extends FlameGame {
 
   Future<void> _initializeGame() async {
     incorrectTaps = 0;
-    score = 0;
-    boxprovider.setStartGame(false);
+    boxprovider.setScore = 0;
     correctSquares = _generateRandomSquares(maxCorrectSquares);
 
-    grid = GridComponent2(correctSquares,
-        colors: [Colors.blue],
-        onIncorrectTap: _handleIncorrectTap,
-        onCorrectTap: _handleCorrectTap);
+    grid = GridComponent2(
+      correctSquares,
+      onIncorrectTap: _handleIncorrectTap,
+      onCorrectTap: _handleCorrectTap,
+    );
 
     add(grid);
-
-    grid.showBlues(); // Tüm mavi renkleri göster
-    boxprovider.setStartGame(true);
+    grid.showBlues(duration: Duration(milliseconds: seconds));
   }
 
   void _handleIncorrectTap() async {
@@ -58,9 +55,9 @@ class MemoryGame2 extends FlameGame {
   }
 
   void _handleCorrectTap() async {
-    score++;
+    boxprovider.setScore++;
 
-    if (score == maxCorrectSquares) {
+    if (boxprovider.setScore == maxCorrectSquares) {
       boxprovider.setOption(1);
       FlameAudio.play('sound/succes_game.mp3', volume: 0.8);
       await Future.delayed(Duration(milliseconds: 900));

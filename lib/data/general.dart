@@ -1,6 +1,6 @@
 class GeneralDefinition {
   static Map<String, int> games = {
-    "Box Game [Colors]": 0,
-    "Box Game [Numbers]": 1,
+    "Kutu Oyunu [Renkler]": 0,
+    "Kutu Oyunu [Sıralı]": 1,
   };
 }

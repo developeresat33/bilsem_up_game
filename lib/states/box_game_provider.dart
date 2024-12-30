@@ -9,7 +9,7 @@ class MemoryGameProvider with ChangeNotifier {
   ValueNotifier<int> elapsedSeconds = ValueNotifier(0);
   late Timer scoreTimer;
   int totalScore = 0;
-
+  int setScore = 0;
 
   setOption(int value) {
     endOption = value;
@@ -42,4 +42,7 @@ class MemoryGameProvider with ChangeNotifier {
     if (!hasStartGame!) endOption = 0;
     notifyListeners();
   }
+
+
+  
 }

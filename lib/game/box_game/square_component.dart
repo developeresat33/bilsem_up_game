@@ -18,8 +18,10 @@ class SquareComponent extends PositionComponent with TapCallbacks {
   late List<int> correctSquaresIndex;
   final VoidCallback? onIncorrectTap;
   final VoidCallback? onCorrectTap;
+
   var boxprovider =
       Provider.of<MemoryGameProvider>(Get.context!, listen: false);
+
   SquareComponent(
     this.initialColor,
     Vector2 position,
@@ -41,8 +43,7 @@ class SquareComponent extends PositionComponent with TapCallbacks {
   void render(Canvas canvas) {
     super.render(canvas);
 
-    const double cornerRadius = 20.0;
-
+    double cornerRadius = MediaQuery.of(Get.context!).size.width * 0.025;
     final rect = size.toRect();
     final rrect = RRect.fromRectAndRadius(rect, Radius.circular(cornerRadius));
 
@@ -58,11 +59,6 @@ class SquareComponent extends PositionComponent with TapCallbacks {
   }
 
   @override
-  FutureOr<void> onLoad() {
-    return super.onLoad();
-  }
-
-  @override
   void onTapDown(TapDownEvent event) {
     super.onTapDown(event);
     if (boxprovider.hasStartGame! &&
@@ -70,9 +66,11 @@ class SquareComponent extends PositionComponent with TapCallbacks {
         currentColor == Colors.grey[800]!) {
       FlameAudio.play('sound/click_sound.wav', volume: 0.5);
       if (!isCorrect) {
+        print("IM INCORRECT");
         onIncorrectTap?.call();
         changeColor(Colors.blueGrey);
       } else {
+        print("IM CORRECT");
         onCorrectTap?.call();
         changeColor(correctColors[
             correctSquaresIndex.indexOf(index) % correctColors.length]);
@@ -82,14 +80,20 @@ class SquareComponent extends PositionComponent with TapCallbacks {
     }
   }
 
+  void showCorrectColor() {
+    currentColor = correctColors[
+        correctSquaresIndex.indexOf(index) % correctColors.length];
+  }
+
   void changeColor(Color newColor) {
     currentColor = newColor;
   }
 
   Future<void> animateSizeChange() async {
-    final targetSize = size.clone()..multiply(Vector2(1.1, 1.1));
-
+    final targetSize = size.clone()..multiply(Vector2(1.0, 1.0));
     final originalSize = size.clone();
+    final originalPosition = position.clone();
+    final targetPosition = position.clone()..add(Vector2(0, -10));
 
     final duration = 0.2;
 
@@ -99,6 +103,16 @@ class SquareComponent extends PositionComponent with TapCallbacks {
         EffectController(duration: duration, reverseDuration: duration),
         onComplete: () {
           size = originalSize;
+        },
+      ),
+    );
+
+    add(
+      MoveEffect.to(
+        targetPosition,
+        EffectController(duration: duration, reverseDuration: duration),
+        onComplete: () {
+          position = originalPosition;
         },
       ),
     );

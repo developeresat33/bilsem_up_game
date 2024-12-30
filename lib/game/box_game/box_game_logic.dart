@@ -34,20 +34,13 @@ class MemoryGame extends FlameGame {
   Future<void> _initializeGame() async {
     incorrectTaps = 0;
     score = 0;
-    boxprovider.setStartGame(false);
     correctSquares = _generateRandomSquares(maxCorrectSquares);
 
-    grid = GridComponent(correctSquares, colors,
+    grid = GridComponent(seconds, correctSquares, colors,
         onIncorrectTap: _handleIncorrectTap, onCorrectTap: _handleCorrectTap);
     add(grid);
-
-    Timer.periodic(Duration(milliseconds: seconds), (timer) {
-      if (timer.tick >= 10) {
-        grid.hideColors();
-        timer.cancel();
-        boxprovider.setStartGame(true);
-      }
-    });
+   
+    grid.initColor();
   }
 
   void _handleIncorrectTap() async {
