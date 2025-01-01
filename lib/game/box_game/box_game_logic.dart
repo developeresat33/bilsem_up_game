@@ -39,7 +39,7 @@ class MemoryGame extends FlameGame {
     grid = GridComponent(seconds, correctSquares, colors,
         onIncorrectTap: _handleIncorrectTap, onCorrectTap: _handleCorrectTap);
     add(grid);
-   
+
     grid.initColor();
   }
 

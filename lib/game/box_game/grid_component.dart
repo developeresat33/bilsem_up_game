@@ -12,7 +12,7 @@ class GridComponent extends PositionComponent with HasGameRef {
   final List<Color> colors;
   final List<SquareComponent> squares = [];
   final double gridSize = 3;
-  final double squareSize = MediaQuery.of(Get.context!).size.height * 0.085;
+  final double squareSize = MediaQuery.of(Get.context!).size.height * 0.105;
   final double gap = 4.0;
   final VoidCallback? onIncorrectTap;
   final VoidCallback? onCorrectTap;
@@ -82,5 +82,7 @@ class GridComponent extends PositionComponent with HasGameRef {
       hideColors();
     });
     boxprovider.setStartGame(true);
+    await Future.delayed(Duration(milliseconds: 50));
+    boxprovider.startLevelTimer();
   }
 }

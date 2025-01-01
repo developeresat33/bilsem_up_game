@@ -26,14 +26,17 @@ class MemoryGameProvider with ChangeNotifier {
   }
 
   Future<void> stopLevelTimer() async {
-    scoreTimer.cancel();
+    if (scoreTimer.isActive) {
+      scoreTimer.cancel();
+    }
   }
 
-  int calculateScore(int elapsedSeconds) {
-    if (elapsedSeconds <= 3) return 100;
-    if (elapsedSeconds < 4) return 80;
-    if (elapsedSeconds <= 8) return 50;
-    return 20;
+  int calculateScore() {
+    print(elapsedSeconds.value);
+    if (elapsedSeconds.value <= 3) return 10;
+    if (elapsedSeconds.value < 4) return 8;
+    if (elapsedSeconds.value <= 8) return 5;
+    return 3;
   }
 
   setStartGame(bool value) async {
@@ -42,7 +45,4 @@ class MemoryGameProvider with ChangeNotifier {
     if (!hasStartGame!) endOption = 0;
     notifyListeners();
   }
-
-
-  
 }

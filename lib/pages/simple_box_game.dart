@@ -4,6 +4,7 @@ import 'package:bilsemup_minigame/game/box_game/box_game_logic.dart';
 import 'package:bilsemup_minigame/states/box_game_provider.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 
 class SimpleBoxGame extends StatefulWidget {
@@ -19,7 +20,7 @@ class _SimpleBoxGameState extends State<SimpleBoxGame> {
   List<int> correctAnswers = [];
   int gameIndex = 0;
 
-  late Timer _scoreTimer;
+  var provider = Provider.of<MemoryGameProvider>(Get.context!, listen: false);
 
   @override
   void initState() {
@@ -33,14 +34,16 @@ class _SimpleBoxGameState extends State<SimpleBoxGame> {
     _dialogVisible = true;
     correctAnswers = [];
     gameIndex = 0;
-    context.read<MemoryGameProvider>().totalScore = 0;
+    provider.totalScore = 0;
+    provider.elapsedSeconds.value = 0;
+
     options = [
       GameOptions(
           colors: [Colors.blue, Colors.red, Colors.green],
           correctSquares: 3,
           milliseconds: 900)
     ];
-    context.read<MemoryGameProvider>().endOption = 0;
+    provider.endOption = 0;
 
     _countdownTimer = Timer.periodic(Duration(seconds: 1), (timer) {
       setState(() {
@@ -49,8 +52,6 @@ class _SimpleBoxGameState extends State<SimpleBoxGame> {
         } else {
           _countdownTimer.cancel();
           _dialogVisible = false;
-          context.read<MemoryGameProvider>().startLevelTimer();
-          _scoreTimer = context.read<MemoryGameProvider>().scoreTimer;
         }
       });
     });
@@ -59,7 +60,8 @@ class _SimpleBoxGameState extends State<SimpleBoxGame> {
   @override
   void dispose() {
     if (_countdownTimer.isActive) _countdownTimer.cancel();
-    if (_scoreTimer.isActive) _scoreTimer.cancel();
+    provider.stopLevelTimer();
+
     super.dispose();
   }
 
@@ -133,8 +135,8 @@ class _SimpleBoxGameState extends State<SimpleBoxGame> {
                           ),
                           Container(
                             alignment: Alignment.center,
-                            height: MediaQuery.of(context).size.height * 0.25,
-                            width: MediaQuery.of(context).size.height * 0.25,
+                            height: MediaQuery.of(context).size.height * 0.3,
+                            width: MediaQuery.of(context).size.height * 0.3,
                             child: GameWidget(
                               backgroundBuilder: (context) {
                                 return Container(
@@ -156,18 +158,16 @@ class _SimpleBoxGameState extends State<SimpleBoxGame> {
                                           .read<MemoryGameProvider>()
                                           .endOption !=
                                       2) {
+                                    print(context
+                                        .read<MemoryGameProvider>()
+                                        .elapsedSeconds
+                                        .value);
                                     int score = context
                                         .read<MemoryGameProvider>()
-                                        .calculateScore(context
-                                            .read<MemoryGameProvider>()
-                                            .elapsedSeconds
-                                            .value);
+                                        .calculateScore();
                                     context
                                         .read<MemoryGameProvider>()
                                         .totalScore += score;
-                                    await context
-                                        .read<MemoryGameProvider>()
-                                        .startLevelTimer();
                                   }
 
                                   gameIndex++;
@@ -230,6 +230,7 @@ class _SimpleBoxGameState extends State<SimpleBoxGame> {
                                         Colors.green
                                       ], correctSquares: 3, milliseconds: 900));
                                     }
+                  
                                   });
 
                                   if (context
@@ -337,9 +338,9 @@ class _SimpleBoxGameState extends State<SimpleBoxGame> {
                             child: Container(
                                 alignment: Alignment.center,
                                 height:
-                                    MediaQuery.of(context).size.height * 0.09,
+                                    MediaQuery.of(context).size.height * 0.12,
                                 width:
-                                    MediaQuery.of(context).size.height * 0.09,
+                                    MediaQuery.of(context).size.height * 0.12,
                                 decoration: BoxDecoration(
                                   color: Colors.white,
                                   borderRadius: BorderRadius.circular(10.0),
@@ -348,8 +349,7 @@ class _SimpleBoxGameState extends State<SimpleBoxGame> {
                                       color: Colors.grey.withOpacity(0.5),
                                       spreadRadius: 3,
                                       blurRadius: 5,
-                                      offset: Offset(
-                                          0, 3), // changes position of shadow
+                                      offset: Offset(0, 3),
                                     ),
                                   ],
                                 ),
@@ -376,7 +376,7 @@ class _SimpleBoxGameState extends State<SimpleBoxGame> {
             if (context.read<MemoryGameProvider>().endOption == 2)
               CommonUiWidgets.gameOverWidget(context, () {
                 if (_countdownTimer.isActive) _countdownTimer.cancel();
-                if (_scoreTimer.isActive) _scoreTimer.cancel();
+                context.read<MemoryGameProvider>().stopLevelTimer();
                 setState(() {
                   _init();
                 });
@@ -390,8 +390,8 @@ class _SimpleBoxGameState extends State<SimpleBoxGame> {
   Widget _showCountdownDialog() {
     return Center(
       child: Container(
-        width: MediaQuery.of(context).size.height * 0.09,
-        height: MediaQuery.of(context).size.height * 0.09,
+        width: MediaQuery.of(Get.context!).size.height * 0.09,
+        height: MediaQuery.of(Get.context!).size.height * 0.09,
         alignment: Alignment.center,
         decoration: BoxDecoration(
           color: Colors.white,

@@ -11,7 +11,7 @@ class GridComponent2 extends PositionComponent with HasGameRef {
 
   final List<SquareComponent2> squares = [];
   final double gridSize = 3;
-  final double squareSize = MediaQuery.of(Get.context!).size.height * 0.085;
+  final double squareSize = MediaQuery.of(Get.context!).size.height * 0.105;
   final double gap = 4.0;
   final VoidCallback? onIncorrectTap;
   final VoidCallback? onCorrectTap;
@@ -71,22 +71,25 @@ class GridComponent2 extends PositionComponent with HasGameRef {
 
     await Future.delayed(Duration(milliseconds: 900), () async {
       for (int i = 0; i < correctSquares.length; i++) {
-        final index = correctSquares[i]; // Doğru index alındığından emin olun
+        final index = correctSquares[i];
         if (index >= squares.length) {
-          continue; // Geçersiz bir index varsa işlemi atla
+          continue;
         }
 
         final square = squares[index];
 
-        // Kareyi mavi renge dönüştür
         square.changeColor(Colors.blue);
-        await Future.delayed(getDuration); // Mavi olarak bekle
+        await Future.delayed(getDuration);
 
-        // Kareyi gri renge geri döndür
         square.changeColor(Colors.grey[800]!);
-        await Future.delayed(getDuration); // Gri olarak bekle
+
+        if (i != correctSquares.length - 1) {
+          await Future.delayed(getDuration);
+        }
       }
     });
     boxprovider.setStartGame(true);
+    await Future.delayed(Duration(milliseconds: 50));
+    boxprovider.startLevelTimer();
   }
 }

@@ -4,6 +4,7 @@ import 'package:bilsemup_minigame/game/box_game_2/box_game_logic2.dart';
 import 'package:bilsemup_minigame/states/box_game_provider.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 
 class SimpleBoxGame2 extends StatefulWidget {
@@ -18,7 +19,7 @@ class _SimpleBoxGame2State extends State<SimpleBoxGame2> {
   List<GameOptions> options = [];
   List<int> correctAnswers = [];
   int gameIndex = 0;
-  late Timer _scoreTimer;
+  var provider = Provider.of<MemoryGameProvider>(Get.context!, listen: false);
 
   @override
   void initState() {
@@ -31,9 +32,10 @@ class _SimpleBoxGame2State extends State<SimpleBoxGame2> {
     _dialogVisible = true;
     correctAnswers = [];
     gameIndex = 0;
-    context.read<MemoryGameProvider>().totalScore = 0;
+    provider.totalScore = 0;
+    provider.elapsedSeconds.value = 0;
+    provider.endOption = 0;
     options = [GameOptions(correctSquares: 3, milliseconds: 400)];
-    context.read<MemoryGameProvider>().endOption = 0;
 
     _countdownTimer = Timer.periodic(Duration(seconds: 1), (timer) {
       setState(() {
@@ -42,8 +44,6 @@ class _SimpleBoxGame2State extends State<SimpleBoxGame2> {
         } else {
           _countdownTimer.cancel();
           _dialogVisible = false;
-          context.read<MemoryGameProvider>().startLevelTimer();
-          _scoreTimer = context.read<MemoryGameProvider>().scoreTimer;
         }
       });
     });
@@ -52,7 +52,7 @@ class _SimpleBoxGame2State extends State<SimpleBoxGame2> {
   @override
   void dispose() {
     if (_countdownTimer.isActive) _countdownTimer.cancel();
-    if (_scoreTimer.isActive) _scoreTimer.cancel();
+    provider.stopLevelTimer();
     super.dispose();
   }
 
@@ -126,8 +126,8 @@ class _SimpleBoxGame2State extends State<SimpleBoxGame2> {
                           ),
                           Container(
                             alignment: Alignment.center,
-                            height: MediaQuery.of(context).size.height * 0.25,
-                            width: MediaQuery.of(context).size.height * 0.25,
+                            height: MediaQuery.of(context).size.height * 0.3,
+                            width: MediaQuery.of(context).size.height * 0.3,
                             child: GameWidget(
                               backgroundBuilder: (context) {
                                 return Container(
@@ -148,18 +148,16 @@ class _SimpleBoxGame2State extends State<SimpleBoxGame2> {
                                           .read<MemoryGameProvider>()
                                           .endOption !=
                                       2) {
+                                    print(context
+                                        .read<MemoryGameProvider>()
+                                        .elapsedSeconds
+                                        .value);
                                     int score = context
                                         .read<MemoryGameProvider>()
-                                        .calculateScore(context
-                                            .read<MemoryGameProvider>()
-                                            .elapsedSeconds
-                                            .value);
+                                        .calculateScore();
                                     context
                                         .read<MemoryGameProvider>()
                                         .totalScore += score;
-                                    await context
-                                        .read<MemoryGameProvider>()
-                                        .startLevelTimer();
                                   }
 
                                   gameIndex++;
@@ -311,9 +309,9 @@ class _SimpleBoxGame2State extends State<SimpleBoxGame2> {
                             child: Container(
                                 alignment: Alignment.center,
                                 height:
-                                    MediaQuery.of(context).size.height * 0.09,
+                                    MediaQuery.of(context).size.height * 0.12,
                                 width:
-                                    MediaQuery.of(context).size.height * 0.09,
+                                    MediaQuery.of(context).size.height * 0.12,
                                 decoration: BoxDecoration(
                                   color: Colors.white,
                                   borderRadius: BorderRadius.circular(10.0),
@@ -350,7 +348,7 @@ class _SimpleBoxGame2State extends State<SimpleBoxGame2> {
             if (context.read<MemoryGameProvider>().endOption == 2)
               CommonUiWidgets.gameOverWidget(context, () {
                 if (_countdownTimer.isActive) _countdownTimer.cancel();
-                if (_scoreTimer.isActive) _scoreTimer.cancel();
+                context.read<MemoryGameProvider>().stopLevelTimer();
                 setState(() {
                   _init();
                 });
