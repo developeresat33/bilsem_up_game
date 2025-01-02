@@ -44,6 +44,7 @@ class _SimpleBoxGame2State extends State<SimpleBoxGame2> {
         } else {
           _countdownTimer.cancel();
           _dialogVisible = false;
+          provider.stopLevelTimer();
         }
       });
     });
@@ -148,10 +149,6 @@ class _SimpleBoxGame2State extends State<SimpleBoxGame2> {
                                           .read<MemoryGameProvider>()
                                           .endOption !=
                                       2) {
-                                    print(context
-                                        .read<MemoryGameProvider>()
-                                        .elapsedSeconds
-                                        .value);
                                     int score = context
                                         .read<MemoryGameProvider>()
                                         .calculateScore();
@@ -164,6 +161,10 @@ class _SimpleBoxGame2State extends State<SimpleBoxGame2> {
                                   await Future.delayed(
                                       Duration(milliseconds: 50));
                                   setState(() {
+                                    context
+                                        .read<MemoryGameProvider>()
+                                        .elapsedSeconds
+                                        .value = 0;
                                     final bool result = context
                                                 .read<MemoryGameProvider>()
                                                 .endOption ==
@@ -348,7 +349,6 @@ class _SimpleBoxGame2State extends State<SimpleBoxGame2> {
             if (context.read<MemoryGameProvider>().endOption == 2)
               CommonUiWidgets.gameOverWidget(context, () {
                 if (_countdownTimer.isActive) _countdownTimer.cancel();
-                context.read<MemoryGameProvider>().stopLevelTimer();
                 setState(() {
                   _init();
                 });
@@ -362,8 +362,8 @@ class _SimpleBoxGame2State extends State<SimpleBoxGame2> {
   Widget _showCountdownDialog() {
     return Center(
       child: Container(
-        width: MediaQuery.of(context).size.height * 0.09,
-        height: MediaQuery.of(context).size.height * 0.09,
+        width: MediaQuery.of(Get.context!).size.height * 0.09,
+        height: MediaQuery.of(Get.context!).size.height * 0.09,
         alignment: Alignment.center,
         decoration: BoxDecoration(
           color: Colors.white,

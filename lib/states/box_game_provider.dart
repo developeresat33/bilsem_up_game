@@ -7,7 +7,7 @@ class MemoryGameProvider with ChangeNotifier {
   int endOption = 0;
   bool? hasStartGame = false;
   ValueNotifier<int> elapsedSeconds = ValueNotifier(0);
-  late Timer scoreTimer;
+  Timer? scoreTimer;
   int totalScore = 0;
   int setScore = 0;
 
@@ -26,10 +26,11 @@ class MemoryGameProvider with ChangeNotifier {
   }
 
   Future<void> stopLevelTimer() async {
-    if (scoreTimer.isActive) {
-      scoreTimer.cancel();
+    if (scoreTimer != null && scoreTimer!.isActive) {
+      scoreTimer!.cancel();
     }
   }
+
 
   int calculateScore() {
     print(elapsedSeconds.value);

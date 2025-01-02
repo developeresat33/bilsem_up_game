@@ -36,14 +36,13 @@ class _SimpleBoxGameState extends State<SimpleBoxGame> {
     gameIndex = 0;
     provider.totalScore = 0;
     provider.elapsedSeconds.value = 0;
-
+    provider.endOption = 0;
     options = [
       GameOptions(
           colors: [Colors.blue, Colors.red, Colors.green],
           correctSquares: 3,
           milliseconds: 900)
     ];
-    provider.endOption = 0;
 
     _countdownTimer = Timer.periodic(Duration(seconds: 1), (timer) {
       setState(() {
@@ -52,6 +51,7 @@ class _SimpleBoxGameState extends State<SimpleBoxGame> {
         } else {
           _countdownTimer.cancel();
           _dialogVisible = false;
+          provider.stopLevelTimer();
         }
       });
     });
@@ -158,10 +158,6 @@ class _SimpleBoxGameState extends State<SimpleBoxGame> {
                                           .read<MemoryGameProvider>()
                                           .endOption !=
                                       2) {
-                                    print(context
-                                        .read<MemoryGameProvider>()
-                                        .elapsedSeconds
-                                        .value);
                                     int score = context
                                         .read<MemoryGameProvider>()
                                         .calculateScore();
@@ -175,6 +171,10 @@ class _SimpleBoxGameState extends State<SimpleBoxGame> {
                                   await Future.delayed(
                                       Duration(milliseconds: 50));
                                   setState(() {
+                                    context
+                                        .read<MemoryGameProvider>()
+                                        .elapsedSeconds
+                                        .value = 0;
                                     final bool result = context
                                                 .read<MemoryGameProvider>()
                                                 .endOption ==
@@ -230,7 +230,6 @@ class _SimpleBoxGameState extends State<SimpleBoxGame> {
                                         Colors.green
                                       ], correctSquares: 3, milliseconds: 900));
                                     }
-                  
                                   });
 
                                   if (context
@@ -376,7 +375,6 @@ class _SimpleBoxGameState extends State<SimpleBoxGame> {
             if (context.read<MemoryGameProvider>().endOption == 2)
               CommonUiWidgets.gameOverWidget(context, () {
                 if (_countdownTimer.isActive) _countdownTimer.cancel();
-                context.read<MemoryGameProvider>().stopLevelTimer();
                 setState(() {
                   _init();
                 });
