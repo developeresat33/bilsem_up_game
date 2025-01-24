@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:bilsemup_minigame/common/common_ui_widgets.dart';
 import 'package:bilsemup_minigame/game/box_game_2/box_game_logic2.dart';
-import 'package:bilsemup_minigame/states/box_game_provider.dart';
+import 'package:bilsemup_minigame/states/game_provider.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -19,7 +19,7 @@ class _SimpleBoxGame2State extends State<SimpleBoxGame2> {
   List<GameOptions> options = [];
   List<int> correctAnswers = [];
   int gameIndex = 0;
-  var provider = Provider.of<MemoryGameProvider>(Get.context!, listen: false);
+  var provider = Provider.of<GameProvider>(Get.context!, listen: false);
 
   @override
   void initState() {
@@ -72,7 +72,7 @@ class _SimpleBoxGame2State extends State<SimpleBoxGame2> {
           children: [
             if (_dialogVisible) Expanded(child: _showCountdownDialog()),
             if (!_dialogVisible &&
-                context.read<MemoryGameProvider>().endOption != 2)
+                context.read<GameProvider>().endOption != 2)
               Expanded(
                 child: Stack(
                   children: [
@@ -143,17 +143,17 @@ class _SimpleBoxGame2State extends State<SimpleBoxGame2> {
                                 seconds: options[gameIndex].milliseconds!,
                                 onFinishGame: () async {
                                   await context
-                                      .read<MemoryGameProvider>()
+                                      .read<GameProvider>()
                                       .stopLevelTimer();
                                   if (context
-                                          .read<MemoryGameProvider>()
+                                          .read<GameProvider>()
                                           .endOption !=
                                       2) {
                                     int score = context
-                                        .read<MemoryGameProvider>()
+                                        .read<GameProvider>()
                                         .calculateScore();
                                     context
-                                        .read<MemoryGameProvider>()
+                                        .read<GameProvider>()
                                         .totalScore += score;
                                   }
 
@@ -162,11 +162,11 @@ class _SimpleBoxGame2State extends State<SimpleBoxGame2> {
                                       Duration(milliseconds: 50));
                                   setState(() {
                                     context
-                                        .read<MemoryGameProvider>()
+                                        .read<GameProvider>()
                                         .elapsedSeconds
                                         .value = 0;
                                     final bool result = context
-                                                .read<MemoryGameProvider>()
+                                                .read<GameProvider>()
                                                 .endOption ==
                                             1
                                         ? true
@@ -206,11 +206,11 @@ class _SimpleBoxGame2State extends State<SimpleBoxGame2> {
                                   });
 
                                   if (context
-                                          .read<MemoryGameProvider>()
+                                          .read<GameProvider>()
                                           .endOption ==
                                       2) {
                                     print(context
-                                        .read<MemoryGameProvider>()
+                                        .read<GameProvider>()
                                         .totalScore);
                                   }
                                 },
@@ -234,7 +234,7 @@ class _SimpleBoxGame2State extends State<SimpleBoxGame2> {
                                         children: [
                                           ValueListenableBuilder<int>(
                                             valueListenable: context
-                                                .read<MemoryGameProvider>()
+                                                .read<GameProvider>()
                                                 .elapsedSeconds,
                                             builder: (context, elapsedSeconds,
                                                 child) {
@@ -259,7 +259,7 @@ class _SimpleBoxGame2State extends State<SimpleBoxGame2> {
                                                                 width: 5,
                                                               ),
                                                               Text(
-                                                                "Skor: ${context.read<MemoryGameProvider>().totalScore} ",
+                                                                "Skor: ${context.read<GameProvider>().totalScore} ",
                                                               ),
                                                             ],
                                                           ),
@@ -302,7 +302,7 @@ class _SimpleBoxGame2State extends State<SimpleBoxGame2> {
                     ),
                     Align(
                       alignment: Alignment.center,
-                      child: Consumer<MemoryGameProvider>(
+                      child: Consumer<GameProvider>(
                           builder: (context, _value, child) {
                         if (_value.endOption != 0)
                           return Padding(
@@ -346,7 +346,7 @@ class _SimpleBoxGame2State extends State<SimpleBoxGame2> {
                   ],
                 ),
               ),
-            if (context.read<MemoryGameProvider>().endOption == 2)
+            if (context.read<GameProvider>().endOption == 2)
               CommonUiWidgets.gameOverWidget(context, () {
                 if (_countdownTimer.isActive) _countdownTimer.cancel();
                 setState(() {

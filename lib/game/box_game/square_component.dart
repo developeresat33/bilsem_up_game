@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:bilsemup_minigame/states/box_game_provider.dart';
+import 'package:bilsemup_minigame/states/game_provider.dart';
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
 import 'package:flame/events.dart';
@@ -20,7 +20,7 @@ class SquareComponent extends PositionComponent with TapCallbacks {
   final VoidCallback? onCorrectTap;
 
   var boxprovider =
-      Provider.of<MemoryGameProvider>(Get.context!, listen: false);
+      Provider.of<GameProvider>(Get.context!, listen: false);
 
   SquareComponent(
     this.initialColor,

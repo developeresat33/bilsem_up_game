@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:bilsemup_minigame/game/box_game_2/square_component2.dart';
-import 'package:bilsemup_minigame/states/box_game_provider.dart';
+import 'package:bilsemup_minigame/states/game_provider.dart';
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -17,7 +17,7 @@ class GridComponent2 extends PositionComponent with HasGameRef {
   final VoidCallback? onCorrectTap;
 
   var boxprovider =
-      Provider.of<MemoryGameProvider>(Get.context!, listen: false);
+      Provider.of<GameProvider>(Get.context!, listen: false);
   GridComponent2(
     this.correctSquares, {
     this.onIncorrectTap,

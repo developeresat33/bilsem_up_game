@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:bilsemup_minigame/game/box_game/grid_component.dart';
-import 'package:bilsemup_minigame/states/box_game_provider.dart';
+import 'package:bilsemup_minigame/states/game_provider.dart';
 import 'package:flame/game.dart';
 import 'package:flame_audio/flame_audio.dart';
 import 'package:flutter/material.dart';
@@ -18,7 +18,7 @@ class MemoryGame extends FlameGame {
   final int maxCorrectSquares;
   final int seconds;
   var boxprovider =
-      Provider.of<MemoryGameProvider>(Get.context!, listen: false);
+      Provider.of<GameProvider>(Get.context!, listen: false);
 
   MemoryGame(
       {required this.onFinishGame,

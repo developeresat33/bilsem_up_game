@@ -1,4 +1,4 @@
-import 'package:bilsemup_minigame/states/box_game_provider.dart';
+import 'package:bilsemup_minigame/states/game_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -80,7 +80,7 @@ class CommonUiWidgets {
                           width: 10,
                         ),
                         Text(
-                          "Skor : ${context.read<MemoryGameProvider>().totalScore}",
+                          "Skor : ${context.read<GameProvider>().totalScore}",
                           style: TextStyle(fontSize: 17),
                         )
                       ],

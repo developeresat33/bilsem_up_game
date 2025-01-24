@@ -1,6 +1,7 @@
 import 'package:bilsemup_minigame/data/general.dart';
 import 'package:bilsemup_minigame/pages/simple_box_game.dart';
 import 'package:bilsemup_minigame/pages/simple_box_game_2.dart';
+import 'package:bilsemup_minigame/pages/match_game.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -48,6 +49,10 @@ class _GameListState extends State<GameList> {
 
                               case 1:
                                 Get.to(() => SimpleBoxGame2());
+                                break;
+
+                              case 2:
+                                Get.to(() => MatchGame());
                                 break;
                               default:
                                 break;

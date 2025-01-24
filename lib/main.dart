@@ -1,5 +1,5 @@
 import 'package:bilsemup_minigame/pages/game_list.dart';
-import 'package:bilsemup_minigame/states/box_game_provider.dart';
+import 'package:bilsemup_minigame/states/game_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -8,13 +8,12 @@ import 'package:provider/provider.dart';
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp, // Sadece dikey (yukarı)
-    DeviceOrientation.portraitDown, // Dikey (ters)
-  ]).then((_) {
-    runApp(MultiProvider(providers: [
-      ChangeNotifierProvider(create: (_) => MemoryGameProvider()),
-    ], child: const MyApp()));
-  });
+    DeviceOrientation.portraitUp, 
+    DeviceOrientation.portraitDown, 
+  ]);
+  runApp(MultiProvider(providers: [
+    ChangeNotifierProvider(create: (_) => GameProvider()),
+  ], child: const MyApp()));
 }
 
 class MyApp extends StatelessWidget {

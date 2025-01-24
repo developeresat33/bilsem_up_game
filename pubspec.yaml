@@ -39,6 +39,7 @@ dependencies:
   provider: ^6.1.2
   get: ^4.6.6
   flame_audio: ^2.10.1
+  image: ^4.5.2
 
 
 dev_dependencies:
@@ -64,6 +65,7 @@ flutter:
   uses-material-design: true
   assets:
   - assets/audio/sound/
+  - assets/img/
 
 
   # To add assets to your application, add an assets section, like this:

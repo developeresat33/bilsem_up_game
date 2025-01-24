@@ -6,7 +6,7 @@ import 'package:flame_audio/flame_audio.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
-import 'package:bilsemup_minigame/states/box_game_provider.dart';
+import 'package:bilsemup_minigame/states/game_provider.dart';
 
 class SquareComponent2 extends PositionComponent with TapCallbacks {
   final Color initialColor;
@@ -19,7 +19,7 @@ class SquareComponent2 extends PositionComponent with TapCallbacks {
   final VoidCallback? onCorrectTap;
 
   var boxprovider =
-      Provider.of<MemoryGameProvider>(Get.context!, listen: false);
+      Provider.of<GameProvider>(Get.context!, listen: false);
 
   SquareComponent2(
     this.initialColor,
