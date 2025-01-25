@@ -1,5 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.bilsemup_minigame">
+
+    <uses-permission android:name="android.permission.INTERNET" />
    <application
         android:label="bilsemup_minigame"
         android:name="${applicationName}"
