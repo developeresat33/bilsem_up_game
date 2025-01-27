@@ -1,4 +1,5 @@
 import 'package:bilsemup_minigame/data/general.dart';
+import 'package:bilsemup_minigame/pages/dot_connect.dart';
 import 'package:bilsemup_minigame/pages/simple_box_game.dart';
 import 'package:bilsemup_minigame/pages/simple_box_game_2.dart';
 import 'package:bilsemup_minigame/pages/match_game.dart';
@@ -53,6 +54,10 @@ class _GameListState extends State<GameList> {
 
                               case 2:
                                 Get.to(() => MatchGame());
+                                break;
+
+                              case 3:
+                                Get.to(() => GameScreen());
                                 break;
                               default:
                                 break;

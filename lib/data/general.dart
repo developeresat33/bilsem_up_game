@@ -3,5 +3,6 @@ class GeneralDefinition {
     "Kutu Oyunu [Renkler]": 0,
     "Kutu Oyunu [Sıralı]": 1,
     "Eşleştirme Oyunu": 2,
+    "Dot Connect Oyunu": 3,
   };
 }
