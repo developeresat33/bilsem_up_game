@@ -1,13 +1,14 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:math';
-
+import 'package:bilsemup_minigame/data/level_data.dart';
 import 'package:bilsemup_minigame/dialog/game_dialog.dart';
 import 'package:bilsemup_minigame/pages/match_game.dart';
 import 'package:flame_audio/flame_audio.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:stop_watch_timer/stop_watch_timer.dart';
+import 'package:http/http.dart' as http;
 
 class GameProvider with ChangeNotifier {
   int endOption = 0;
@@ -19,11 +20,299 @@ class GameProvider with ChangeNotifier {
   int totalScore = 0;
   int setScore = 0;
   int level = 1;
+  int currentPage = 0;
   bool isPaused = false;
   List<CardModel>? cards;
   CardModel? firstSelectedCard;
   bool isChecking = false;
+  int gridSize = 5;
+  List<List<Color?>>? gridColors;
+  List<dynamic>? points;
+  dynamic levelData;
+  List<List<bool>>? visited;
+  Offset? startPoint;
+  List<Offset> currentPath = [];
+  Map<Color, List<Offset>> completedPaths = {};
+  AnimationController? glowAnimationController;
+  AnimationController? animationController;
+  List<Offset>? animatedPoints;
   final Set<String> _cachedImages = {};
+  List<LevelData> levels = [];
+  Map<int, List<LevelData>> groupedLevels = {};
+  LevelData? selectedLevel;
+  double? gridSizePx;
+  PageController? pageController;
+  String? selectedCategory;
+
+  setCurrentPage(int page) {
+    currentPage = page;
+    notifyListeners();
+  }
+
+  startStopBgmMusic() async {
+    if (FlameAudio.bgm.isPlaying) {
+      await FlameAudio.bgm.pause();
+      isPaused = true;
+    } else {
+      await FlameAudio.bgm.resume();
+      isPaused = false;
+    }
+    notifyListeners();
+  }
+
+  Future<void> loadLevels(String category) async {
+    levels = [];
+    print('Kategori: $category');
+    try {
+      // API'den JSON verisi çek
+      final response = await http.get(
+        Uri.parse('https://bilsemup.com/uygulama/json/$category.json'),
+      );
+
+      // HTTP isteğinin başarılı olduğunu kontrol et
+      if (response.statusCode == 200) {
+        // JSON stringini decode et
+        List<dynamic> jsonData = json.decode(response.body);
+
+        // Veriyi LevelData listesine dönüştür
+        levels = jsonData.map((data) => LevelData.fromJson(data)).toList();
+
+        // Level verilerini gridSize'e göre grupla
+        groupedLevels = {};
+        for (var level in levels) {
+          groupedLevels[level.gridSize] = [
+            ...?groupedLevels[level.gridSize],
+            level,
+          ];
+        }
+
+        pageController!.animateToPage(1,
+            duration: Duration(milliseconds: 500), curve: Curves.easeInOut);
+        currentPage = 1;
+        notifyListeners();
+      } else {
+
+        // ENTEGRE'DE DEFAULT MSG PAKETİ KULLANILABİLİR..
+        Get.showSnackbar(
+          const GetSnackBar(
+            message: 'Veri Çekme Başarısız',
+            duration: Duration(seconds: 2),
+            backgroundColor: Colors.red,
+            icon: Icon(
+              Icons.error,
+              color: Colors.white,
+            ),
+            snackPosition: SnackPosition.BOTTOM,
+            margin: EdgeInsets.all(16),
+        ));
+        throw Exception('Veri çekme başarısız: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Bir hata oluştu: $e');
+    }
+  }
+
+  void handleTouchStart(Offset localPosition) {
+    int x = (localPosition.dy ~/
+            (MediaQuery.of(Get.context!).size.width / gridSize))
+        .clamp(0, gridSize - 1);
+    int y = (localPosition.dx ~/
+            (MediaQuery.of(Get.context!).size.width / gridSize))
+        .clamp(0, gridSize - 1);
+
+    if (gridColors![x][y] != null) {
+      final color = gridColors![x][y];
+
+      if (completedPaths.containsKey(color)) {
+        resetPathForColor(color!);
+      }
+
+      startPoint = Offset(x.toDouble(), y.toDouble());
+      currentPath.add(startPoint!);
+    }
+    notifyListeners();
+  }
+
+  void handleTouchUpdate(Offset localPosition) {
+    if (startPoint == null) return;
+
+    int x = (localPosition.dy ~/
+            (MediaQuery.of(Get.context!).size.width / gridSize))
+        .clamp(0, gridSize - 1);
+    int y = (localPosition.dx ~/
+            (MediaQuery.of(Get.context!).size.width / gridSize))
+        .clamp(0, gridSize - 1);
+
+    Offset newPoint = Offset(x.toDouble(), y.toDouble());
+
+    if (visited![x][y] ||
+        (gridColors![x][y] != null &&
+            gridColors![x][y] !=
+                gridColors![startPoint!.dx.toInt()][startPoint!.dy.toInt()])) {
+      return;
+    }
+
+    if (currentPath.length > 1 &&
+        newPoint == currentPath[currentPath.length - 2]) {
+      currentPath.removeLast();
+      notifyListeners();
+      return;
+    }
+
+    if ((newPoint.dx == currentPath.last.dx &&
+            (newPoint.dy - currentPath.last.dy).abs() == 1) ||
+        (newPoint.dy == currentPath.last.dy &&
+            (newPoint.dx - currentPath.last.dx).abs() == 1)) {
+      if (!currentPath.contains(newPoint)) {
+        currentPath.add(newPoint);
+        notifyListeners();
+      }
+    }
+  }
+
+  void handleTouchEnd() async {
+    if (startPoint != null && currentPath.isNotEmpty) {
+      Offset lastPoint = currentPath.last;
+
+      if (gridColors![lastPoint.dx.toInt()][lastPoint.dy.toInt()] ==
+          gridColors![startPoint!.dx.toInt()][startPoint!.dy.toInt()]) {
+        final color =
+            gridColors![startPoint!.dx.toInt()][startPoint!.dy.toInt()]!;
+        completedPaths[color] = List.from(currentPath);
+
+        for (var point in currentPath) {
+          visited![point.dx.toInt()][point.dy.toInt()] = true;
+        }
+
+        animatedPoints = [startPoint!, lastPoint];
+        animationController!.forward(from: 0);
+        await Future.delayed(const Duration(milliseconds: 100));
+        await animationController!.reverse();
+
+        await FlameAudio.play('sound/connect.mp3', volume: 0.8);
+      }
+    }
+
+    startPoint = null;
+    currentPath.clear();
+    notifyListeners();
+  }
+
+  void resetPathForColor(Color color) {
+    if (!completedPaths.containsKey(color)) return;
+
+    final path = completedPaths[color]!;
+    for (var point in path) {
+      visited![point.dx.toInt()][point.dy.toInt()] = false;
+    }
+
+    completedPaths.remove(color);
+    notifyListeners();
+  }
+
+  bool isGameCompleted() {
+    for (var point in points!) {
+      final color = getColorFromName(point['color']);
+      final x = point['x'];
+      final y = point['y'];
+
+      if (!completedPaths.containsKey(color) ||
+          !completedPaths[color]!
+              .contains(Offset(x.toDouble(), y.toDouble()))) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  Future<void> setAnimationControllers(
+    TickerProvider async,
+  ) async {
+    animationController = AnimationController(
+      vsync: async,
+      duration: const Duration(milliseconds: 200),
+    )..addListener(() {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          notifyListeners();
+        });
+      });
+
+    glowAnimationController = AnimationController(
+      vsync: async,
+      duration: const Duration(milliseconds: 1500),
+    )..repeat(reverse: true);
+  }
+
+  void disposeAnimateControllers() {
+    if (animationController != null) {
+      if (animationController!.isAnimating) {
+        animationController!.stop(); // Animasyonu durdur
+      }
+      animationController!.dispose(); // AnimationController'ı temizle
+      animationController = null;
+    }
+    if (glowAnimationController != null) {
+      if (glowAnimationController!.isAnimating) {
+        glowAnimationController!.stop(); // Animasyonu durdur
+      }
+      glowAnimationController!.dispose(); // AnimationController'ı temizle
+      glowAnimationController = null;
+    }
+  }
+
+  Future<void> initializeGameFromJson() async {
+    hasStartGame = false;
+    notifyListeners();
+    levelData = selectedLevel!.toJson();
+    completedPaths = {};
+    gridSize = levelData["gridSize"];
+    points = levelData["points"];
+    gridSizePx = MediaQuery.of(Get.context!).size.width / gridSize;
+
+    visited =
+        List.generate(gridSize, (_) => List.generate(gridSize, (_) => false));
+
+    gridColors =
+        List.generate(gridSize, (_) => List.generate(gridSize, (_) => null));
+
+    animatedPoints = [];
+    for (var point in points!) {
+      int x = point["x"];
+      int y = point["y"];
+      String colorName = point["color"];
+      gridColors![x][y] = getColorFromName(colorName);
+
+      animatedPoints!.add(Offset(x.toDouble(), y.toDouble()));
+    }
+
+    animationController!.forward(from: 0);
+
+    await Future.delayed(const Duration(milliseconds: 300));
+
+    await animationController!.reverse();
+    hasStartGame = true;
+    notifyListeners();
+  }
+
+  Color getColorFromName(String colorName) {
+    switch (colorName.toLowerCase()) {
+      case "red":
+        return Colors.red;
+      case "blue":
+        return Colors.blue;
+      case "green":
+        return Colors.green;
+      case "yellow":
+        return Colors.yellow;
+      case "orange":
+        return Colors.orange;
+      case "purple":
+        return Colors.purple;
+      default:
+        return Colors.grey;
+    }
+  }
+
   void pause() {
     isPaused = true;
   }
@@ -92,8 +381,6 @@ class GameProvider with ChangeNotifier {
         notifyListeners();
       });
     });
-
-    
   }
 
   void closeCards() {

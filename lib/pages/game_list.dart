@@ -1,8 +1,9 @@
 import 'package:bilsemup_minigame/data/general.dart';
-import 'package:bilsemup_minigame/pages/dot_connect.dart';
+import 'package:bilsemup_minigame/pages/dot_connect/dot_connect_menu.dart';
 import 'package:bilsemup_minigame/pages/simple_box_game.dart';
 import 'package:bilsemup_minigame/pages/simple_box_game_2.dart';
 import 'package:bilsemup_minigame/pages/match_game.dart';
+import 'package:flame_audio/flame_audio.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -14,6 +15,19 @@ class GameList extends StatefulWidget {
 }
 
 class _GameListState extends State<GameList> {
+  @override
+  void initState() {
+    super.initState();
+    FlameAudio.bgm.initialize();
+  }
+
+
+  @override
+  void dispose() {
+    FlameAudio.bgm.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -57,7 +71,7 @@ class _GameListState extends State<GameList> {
                                 break;
 
                               case 3:
-                                Get.to(() => GameScreen());
+                                Get.to(() => DotGameMenu());
                                 break;
                               default:
                                 break;

@@ -55,6 +55,55 @@ class GameDialog {
     );
   }
 
+  static Widget darkThemeButton(String text, VoidCallback onPressed) {
+    return Ink(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Color.fromARGB(255, 34, 34, 34), Color.fromARGB(255, 22, 21, 21),], // Dark tema renkleri
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(15),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.5),
+            blurRadius: 1,
+            offset: Offset(0, 1), // Hafif gölge efekti
+          ),
+        ],
+      ),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(15),
+        onTap: onPressed,
+        splashColor: Colors.white.withOpacity(0.2), // Tıklama efekti
+        child: Container(
+          width: 100,
+          height: 50,
+          alignment: Alignment.center,
+          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+          child: FittedBox(
+            fit: BoxFit.scaleDown ,
+            child: Text(
+              text,
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.white, // Beyaz yazı rengi
+                shadows: [
+                  Shadow(
+                    blurRadius: 1,
+                    color: Colors.black54,
+                    offset: Offset(1, 1),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   static void showLevelUpDialog(int levelScore) {
     showDialog(
       barrierDismissible: false,
