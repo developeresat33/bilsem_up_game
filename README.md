@@ -1,16 +1,14 @@
-# bilsemup_minigame
+🎮 BilsemUp MiniGame
 
-A new Flutter project.
+BilsemUp MiniGame, Flutter ile geliştirilmiş ve içinde 3 farklı mini oyunu barındıran eğitici ve eğlenceli bir mobil oyun projesidir.
+Proje, hem Flutter öğrenen geliştiriciler hem de oyun mekaniği üzerine çalışmak isteyenler için ilham kaynağı olmayı hedefler.
 
-## Getting Started
+🚀 Özellikler
 
-This project is a starting point for a Flutter application.
+🎲 3 farklı mini oyun
 
-A few resources to get you started if this is your first Flutter project:
+🧠 Eğitici ve eğlenceli içerik
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+📱 Tek kod tabanıyla hem Android hem iOS desteği
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+🔄 Kolay özelleştirme ve genişletilebilir yapı
